@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张三的个人简历</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* 默认配色方案 - 深蓝 */
+            --sidebar-bg: #1e3a8a;
+            --sidebar-text: #ffffff;
+            --sidebar-text-secondary: #e2e8f0;
+            --accent-color: #3b82f6;
+            --card-bg: #f8fafc;
+            --card-hover: #f1f5f9;
+        }
+
+        /* 配色方案选择器 */
+        .color-scheme-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .color-scheme-selector select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* 主容器 */
+        .container {
+            display: flex;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 左侧栏 */
+        .sidebar {
+            width: 350px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 3rem 2rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* 右侧内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 350px;
+            padding: 3rem;
+            background: white;
+        }
+
+        /* 头像区域 */
+        .profile {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .name {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--sidebar-text);
+        }
+
+        .title {
+            color: var(--sidebar-text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* 联系信息 */
+        .contact-info {
+            margin-bottom: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--sidebar-text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .contact-item:hover {
+            color: var(--sidebar-text);
+        }
+
+        .contact-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* 技能进度条 */
+        .skills {
+            margin-bottom: 2rem;
+        }
+
+        .skill-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--sidebar-text-secondary);
+        }
+
+        .skill-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        /* 右侧内容样式 */
+        .section {
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--sidebar-bg);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+        }
+
+        /* 工作经历卡片 */
+        .experience-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .experience-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: var(--card-hover);
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .company {
+            font-weight: bold;
+            color: var(--sidebar-bg);
+            font-size: 1.2rem;
+        }
+
+        .date {
+            color: #666;
+        }
+
+        .experience-content ul {
+            list-style-position: inside;
+            color: #666;
+        }
+
+        .experience-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* 项目经验卡片 */
+        .project-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            background: var(--card-hover);
+        }
+
+        .project-title {
+            font-weight: bold;
+            color: var(--sidebar-bg);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .tech-stack {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .color-scheme-selector {
+                position: static;
+                margin: 10px;
+                text-align: center;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- 配色方案选择器 -->
+    <div class="color-scheme-selector">
+        <select id="colorScheme" onchange="changeColorScheme(this.value)">
+            <option value="blue">深蓝主题</option>
+            <option value="purple">优雅紫</option>
+            <option value="green">清新绿</option>
+            <option value="teal">青绿</option>
+            <option value="rose">玫瑰金</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <!-- 左侧栏 -->
+        <aside class="sidebar">
+            <div class="profile">
+                <div class="avatar">张</div>
+                <h1 class="name">张三</h1>
+                <p class="title">高级Python开发工程师</p>
+            </div>
+
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i>📱</i>
+                    <span>138xxxxxxxx</span>
+                </div>
+                <div class="contact-item">
+                    <i>✉️</i>
+                    <span>zhangsan@email.com</span>
+                </div>
+                <div class="contact-item">
+                    <i>🔗</i>
+                    <a href="https://github.com/zhangsan" target="_blank" style="color: inherit; text-decoration: none;">github.com/zhangsan</a>
+                </div>
+            </div>
+
+            <div class="skills">
+                <h3 style="color: var(--sidebar-text); margin-bottom: 1rem;">技能水平</h3>
+                <div class="skill-item">
+                    <div class="skill-name">
+                        <span>Python</span>
+                        <span>95%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 95%"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">
+                        <span>SQL</span>
+                        <span>85%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 85%"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">
+                        <span>JavaScript</span>
+                        <span>75%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧内容区 -->
+        <main class="main-content">
+            <section class="section" id="experience">
+                <h2 class="section-title">工作经历</h2>
+                <div class="experience-card">
+                    <div class="experience-header">
+                        <span class="company">ABC科技有限公司</span>
+                        <span class="date">2020-至今</span>
+                    </div>
+                    <div class="experience-content">
+                        <strong>高级Python开发工程师</strong>
+                        <ul>
+                            <li>负责公司核心业务系统的后端开发与维护</li>
+                            <li>优化系统性能，将接口响应时间降低50%</li>
+                            <li>设计并实现微服务架构，提高系统可扩展性</li>
+                            <li>带领5人开发团队完成多个重要项目</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="experience-card">
+                    <div class="experience-header">
+                        <span class="company">XYZ网络科技公司</span>
+                        <span class="date">2018-2020</span>
+                    </div>
+                    <div class="experience-content">
+                        <strong>Python开发工程师</strong>
+                        <ul>
+                            <li>开发和维护公司电商平台后端服务</li>
+                            <li>实现订单处理系统，日均处理订单10万+</li>
+                            <li>构建数据分析平台，为运营决策提供支持</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="projects">
+                <h2 class="section-title">项目经验</h2>
+                <div class="project-card">
+                    <div class="project-title">企业级微服务平台</div>
+                    <div class="tech-stack">技术栈：Python, FastAPI, Docker, Kubernetes, Redis</div>
+                    <ul>
+                        <li>设计并实现微服务架构</li>
+                        <li>实现服务注册与发现</li>
+                        <li>构建容器化部署方案</li>
+                        <li>系统性能提升300%</li>
+                    </ul>
+                </div>
+                <div class="project-card">
+                    <div class="project-title">数据分析平台</div>
+                    <div class="tech-stack">技术栈：Python, Django, Vue.js, MySQL</div>
+                    <ul>
+                        <li>设计数据仓库架构</li>
+                        <li>实现数据可视化dashboard</li>
+                        <li>开发自动化报表系统</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="section" id="education">
+                <h2 class="section-title">教育背景</h2>
+                <div class="experience-card">
+                    <div class="experience-header">
+                        <span class="company">某知名大学</span>
+                        <span class="date">2016-2018</span>
+                    </div>
+                    <div class="experience-content">
+                        计算机科学与技术 硕士
+                    </div>
+                </div>
+                <div class="experience-card">
+                    <div class="experience-header">
+                        <span class="company">某知名大学</span>
+                        <span class="date">2012-2016</span>
+                    </div>
+                    <div class="experience-content">
+                        软件工程 学士
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="evaluation">
+                <h2 class="section-title">个人评价</h2>
+                <div class="experience-card">
+                    <ul>
+                        <li>良好的编码习惯和文档编写能力</li>
+                        <li>强烈的责任心和团队协作精神</li>
+                        <li>持续学习新技术，保持技术敏感度</li>
+                        <li>优秀的问题分析和解决能力</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 配色方案
+        const colorSchemes = {
+            blue: {
+                '--sidebar-bg': '#1e3a8a',
+                '--sidebar-text': '#ffffff',
+                '--sidebar-text-secondary': '#e2e8f0',
+                '--accent-color': '#3b82f6',
+                '--card-bg': '#f8fafc',
+                '--card-hover': '#f1f5f9'
+            },
+            purple: {
+                '--sidebar-bg': '#5b21b6',
+                '--sidebar-text': '#ffffff',
+                '--sidebar-text-secondary': '#e9d5ff',
+                '--accent-color': '#8b5cf6',
+                '--card-bg': '#faf5ff',
+                '--card-hover': '#f3e8ff'
+            },
+            green: {
+                '--sidebar-bg': '#065f46',
+                '--sidebar-text': '#ffffff',
+                '--sidebar-text-secondary': '#d1fae5',
+                '--accent-color': '#10b981',
+                '--card-bg': '#f0fdf4',
+                '--card-hover': '#dcfce7'
+            },
+            teal: {
+                '--sidebar-bg': '#134e4a',
+                '--sidebar-text': '#ffffff',
+                '--sidebar-text-secondary': '#ccfbf1',
+                '--accent-color': '#14b8a6',
+                '--card-bg': '#f0fdfa',
+                '--card-hover': '#ccfbf1'
+            },
+            rose: {
+                '--sidebar-bg': '#881337',
+                '--sidebar-text': '#ffffff',
+                '--sidebar-text-secondary': '#fecdd3',
+                '--accent-color': '#e11d48',
+                '--card-bg': '#fff1f2',
+                '--card-hover': '#ffe4e6'
+            }
+        };
+
+        // 切换配色方案
+        function changeColorScheme(scheme) {
+            const root = document.documentElement;
+            const colors = colorSchemes[scheme];
+            
+            for (const [property, value] of Object.entries(colors)) {
+                root.style.setProperty(property, value);
+            }
+        }
+
+        // 滚动动画
+        const sections = document.querySelectorAll('.section');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // 技能进度条动画
+        const skillBars = document.querySelectorAll('.skill-progress');
+        
+        const skillObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.width = entry.target.parentElement.previousElementSibling.lastElementChild.textContent;
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+
+        skillBars.forEach(bar => {
+            bar.style.width = '0';
+            skillObserver.observe(bar);
+        });
+    </script>
+</body>
+</html> 
